@@ -29,33 +29,28 @@ export default {
       colorYellow: 'grey',
       colorGreen: 'grey',
       traffTimeout: [
-        3000,
-        2000,
-        4000
+        15000,
+        1500,
+        3000
       ]
     }
   },
   created () {
-    const routes = this.$router.options.routes
-    let traffTimeout = this.traffTimeout[this.routeIndex]
-    let routeIndex = this.routeIndex
-    const router = this.$router
-    let colorRed = this.colorRed
-    let colorYellow = this.colorYellow
-    let colorGreen = this.colorGreen
+    const tf = this
+    let isStart = true
     const startLight = function () {
       setTimeout(() => {
-        console.log(routes[routeIndex].path)
-        console.log(colorRed)
-        console.log(traffTimeout)
+        const routes = tf.$router.options.routes
+        console.log(tf.traffTimeout[tf.routeIndex])
         // Цвет светофора в зависимотси от this.routes[this.routeIndex].path. Таймер выставляю тоже отнасительно this.routeIndex
-        routes[routeIndex].path === '' ? colorRed = 'red' : colorRed = 'grey'
-        routes[routeIndex].path === '/1' ? colorYellow = 'yellow' : colorYellow = 'grey'
-        routes[routeIndex].path === '/2' ? colorGreen = 'green' : colorGreen = 'grey'
-        router.push(routes[routeIndex])
-        routeIndex = (routeIndex + 1) % routes.length
-      }, traffTimeout)
-      startLight()
+        routes[tf.routeIndex].path === '' ? tf.colorRed = 'red' : tf.colorRed = 'grey'
+        routes[tf.routeIndex].path === '/1' ? tf.colorYellow = 'yellow' : tf.colorYellow = 'grey'
+        routes[tf.routeIndex].path === '/2' ? tf.colorGreen = 'green' : tf.colorGreen = 'grey'
+        tf.$router.push(routes[tf.routeIndex])
+        tf.routeIndex = (tf.routeIndex + 1) % routes.length
+        startLight()
+      }, isStart ? 100 : tf.traffTimeout[tf.routeIndex])
+      isStart = false
     }
     startLight()
   }
