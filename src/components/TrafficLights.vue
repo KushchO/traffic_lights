@@ -1,7 +1,7 @@
 <template>
   <div class="traffic-light">
   <ul class="traffic-light__list">
-    <RedLight/>
+    <RedLight :color="color"/>
     <li class="traffic-light__item">Привет</li>
     <li class="traffic-light__item"></li>
   </ul>
@@ -10,12 +10,26 @@
 
 <script>
 import RedLight from '@/components/RedLight.vue'
+import router from '@/router'
 
 export default {
+  router,
   name: 'TrafficLights',
-  props: ['color'],
   components: {
     RedLight
+  },
+  data: function () {
+    return {
+      routeIndex: 0,
+      color: 'red'
+    }
+  },
+  created () {
+    setInterval(() => {
+      const routes = this.$router.options.routes
+      this.$router.push(routes[this.routeIndex])
+      this.routeIndex = (this.routeIndex + 1) % routes.length
+    }, 1000)
   }
 }
 </script>
