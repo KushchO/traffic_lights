@@ -24,15 +24,25 @@ export default {
   },
   data: function () {
     return {
-      routeIndex: 0,
+      routeIndex: '',
+      searchParams: '',
       colorRed: 'grey',
       colorYellow: 'grey',
       colorGreen: 'grey',
       traffTimeout: [
         15000,
-        1500,
+        10000,
         3000
       ]
+    }
+  },
+  watch: {
+    '$route.params.search': {
+      handler: function (search) {
+        console.log(search)
+      },
+      deep: true,
+      immediate: true
     }
   },
   created () {
@@ -41,17 +51,32 @@ export default {
     const startLight = function () {
       setTimeout(() => {
         const routes = tf.$router.options.routes
+        var currentUrl = window.location.pathname
+        switch (currentUrl) {
+          case '/':
+            tf.routeIndex = 0
+            break
+          case '/1':
+            tf.routeIndex = 1
+            break
+          case '/2':
+            tf.routeIndex = 2
+            break
+        }
+        console.log(currentUrl)
+        tf.$router.push(currentUrl)
         console.log(tf.traffTimeout[tf.routeIndex])
         // Цвет светофора в зависимотси от this.routes[this.routeIndex].path. Таймер выставляю тоже отнасительно this.routeIndex
         routes[tf.routeIndex].path === '' ? tf.colorRed = 'red' : tf.colorRed = 'grey'
         routes[tf.routeIndex].path === '/1' ? tf.colorYellow = 'yellow' : tf.colorYellow = 'grey'
         routes[tf.routeIndex].path === '/2' ? tf.colorGreen = 'green' : tf.colorGreen = 'grey'
-        tf.$router.push(routes[tf.routeIndex])
         tf.routeIndex = (tf.routeIndex + 1) % routes.length
+        tf.$router.push(routes[tf.routeIndex])
         startLight()
       }, isStart ? 100 : tf.traffTimeout[tf.routeIndex])
       isStart = false
     }
+
     startLight()
   }
 }
