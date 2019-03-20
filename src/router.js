@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import TrafficLights from './components/TrafficLights.vue'
 
 Vue.use(Router)
 
@@ -10,16 +10,24 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: Home
+      name: 'Red',
+      component: TrafficLights
     },
     {
-      path: '/about',
-      name: 'about',
+      path: '/2',
+      name: 'Yellow',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+      component: () => import(/* webpackChunkName: "about" */ './components/TrafficLights.vue')
+    },
+    {
+      path: '/3',
+      name: 'Green',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import(/* webpackChunkName: "about" */ './components/TrafficLights.vue')
     }
   ]
 })
