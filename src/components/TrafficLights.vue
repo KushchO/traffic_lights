@@ -1,35 +1,63 @@
 <template>
   <div class="traffic-light">
   <ul class="traffic-light__list">
-    <RedLight :color="color"/>
-    <li class="traffic-light__item">Привет</li>
-    <li class="traffic-light__item"></li>
+    <RedLight :colorRed="colorRed"/>
+    <YellowLight :colorYellow="colorYellow"/>
+    <GreenLight :colorGreen="colorGreen"/>
   </ul>
 </div>
 </template>
 
 <script>
 import RedLight from '@/components/RedLight.vue'
+import YellowLight from '@/components/YellowLight.vue'
+import GreenLight from '@/components/GreenLight.vue'
 import router from '@/router'
 
 export default {
   router,
   name: 'TrafficLights',
   components: {
-    RedLight
+    RedLight,
+    YellowLight,
+    GreenLight
   },
   data: function () {
     return {
       routeIndex: 0,
-      color: 'red'
+      colorRed: 'grey',
+      colorYellow: 'grey',
+      colorGreen: 'grey',
+      traffTimeout: [
+        3000,
+        2000,
+        4000
+      ]
     }
   },
   created () {
-    setInterval(() => {
-      const routes = this.$router.options.routes
-      this.$router.push(routes[this.routeIndex])
-      this.routeIndex = (this.routeIndex + 1) % routes.length
-    }, 1000)
+    const routes = this.$router.options.routes
+    let traffTimeout = this.traffTimeout[this.routeIndex]
+    let routeIndex = this.routeIndex
+    const router = this.$router
+    let colorRed = this.colorRed
+    let colorYellow = this.colorYellow
+    let colorGreen = this.colorGreen
+    const startLight = function () {
+      setTimeout(() => {
+        console.log(routes[routeIndex].path)
+        console.log(colorRed)
+        console.log(traffTimeout)
+        // Цвет светофора в зависимотси от this.routes[this.routeIndex].path. Таймер выставляю тоже отнасительно this.routeIndex
+        routes[routeIndex].path === '' ? colorRed = 'red' : colorRed = 'grey'
+        routes[routeIndex].path === '/1' ? colorYellow = 'yellow' : colorYellow = 'grey'
+        routes[routeIndex].path === '/2' ? colorGreen = 'green' : colorGreen = 'grey'
+        router.push(routes[routeIndex])
+        routeIndex = (routeIndex + 1) % routes.length
+      }, traffTimeout)
+      startLight()
+    }
+    startLight()
   }
 }
 </script>

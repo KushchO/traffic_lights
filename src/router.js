@@ -6,28 +6,22 @@ Vue.use(Router)
 
 export default new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
+  base: '',
   routes: [
     {
-      path: '/',
+      path: '',
       name: 'Red',
       component: TrafficLights
     },
     {
-      path: '/2',
+      path: '/1',
       name: 'Yellow',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './components/TrafficLights.vue')
+      component: TrafficLights
     },
     {
-      path: '/3',
+      path: '/2',
       name: 'Green',
-      // route level code-splitting
-      // this generates a separate chunk (about.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ './components/TrafficLights.vue')
+      component: TrafficLights
     }
   ]
 })
