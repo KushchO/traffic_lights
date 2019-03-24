@@ -1,9 +1,9 @@
 <template>
   <div class="traffic-light">
   <ul class="traffic-light__list">
-    <RedLight :colorRed="colorRed"/>
-    <YellowLight :colorYellow="colorYellow"/>
-    <GreenLight :colorGreen="colorGreen"/>
+    <RedLight :colorRedOpacity="colorRedOpacity" :redTimer="redTimer" :url="url"/>
+    <YellowLight :colorYellowOpacity="colorYellowOpacity" :yellowTimer="yellowTimer" :url="url"/>
+    <GreenLight :colorGreenOpacity="colorGreenOpacity" :greenTimer="greenTimer" :url="url"/>
   </ul>
 </div>
 </template>
@@ -13,6 +13,7 @@ import RedLight from '@/components/RedLight.vue'
 import YellowLight from '@/components/YellowLight.vue'
 import GreenLight from '@/components/GreenLight.vue'
 import router from '@/router'
+import { setInterval, clearInterval, setTimeout, clearTimeout } from 'timers'
 
 export default {
   router,
@@ -24,57 +25,104 @@ export default {
   },
   data: function () {
     return {
-      routeIndex: '',
-      searchParams: '',
-      colorRed: 'grey',
-      colorYellow: 'grey',
-      colorGreen: 'grey',
+      routeIndex: '0',
+      colorRedOpacity: '1',
+      colorYellowOpacity: '0.5',
+      colorGreenOpacity: '0.5',
+      redTimer: 10,
+      yellowTimer: 3,
+      greenTimer: 15,
+      url: '',
       traffTimeout: [
-        15000,
         10000,
-        3000
+        3000,
+        15000
       ]
-    }
-  },
-  watch: {
-    '$route.params.search': {
-      handler: function (search) {
-        console.log(search)
-      },
-      deep: true,
-      immediate: true
     }
   },
   created () {
     const tf = this
-    let isStart = true
-    const startLight = function () {
+    let timerID
+
+    const changeOpacity = function (url) {
+      // Цвет светофора в зависимотси от this.routes[this.routeIndex].path. Таймер выставляю тоже отнасительно this.routeIndex
+      url === '/' ? tf.colorRedOpacity = '1' : tf.colorRedOpacity = '0.5'
+      url === '/1' ? tf.colorYellowOpacity = '1' : tf.colorYellowOpacity = '0.5'
+      url === '/2' ? tf.colorGreenOpacity = '1' : tf.colorGreenOpacity = '0.5'
+    }
+
+    const toggleOpacity = function (url, timeout) {
       setTimeout(() => {
-        const routes = tf.$router.options.routes
-        var currentUrl = window.location.pathname
-        switch (currentUrl) {
+        timerID = setInterval(() => {
+          switch (url) {
+            case '/':
+              tf.colorRedOpacity === '1' ? tf.colorRedOpacity = '0.5' : tf.colorRedOpacity = '1'
+              break
+            case '/1':
+              tf.colorYellowOpacity === '1' ? tf.colorYellowOpacity = '0.5' : tf.colorYellowOpacity = '1'
+              break
+            case '/2':
+              tf.colorGreenOpacity === '1' ? tf.colorGreenOpacity = '0.5' : tf.colorGreenOpacity = '1'
+              break
+          }
+        }, 500)
+      }, tf.traffTimeout[tf.routeIndex] - timeout)
+    }
+
+    const timer = function (url, timeout) {
+      console.log(url)
+      tf.url = url
+      let timerID = setInterval(() => {
+        switch (url) {
           case '/':
-            tf.routeIndex = 0
+            tf.redTimer--
             break
           case '/1':
-            tf.routeIndex = 1
+            tf.yellowTimer--
             break
           case '/2':
-            tf.routeIndex = 2
+            tf.greenTimer--
             break
         }
-        console.log(currentUrl)
-        tf.$router.push(currentUrl)
-        console.log(tf.traffTimeout[tf.routeIndex])
-        // Цвет светофора в зависимотси от this.routes[this.routeIndex].path. Таймер выставляю тоже отнасительно this.routeIndex
-        routes[tf.routeIndex].path === '' ? tf.colorRed = 'red' : tf.colorRed = 'grey'
-        routes[tf.routeIndex].path === '/1' ? tf.colorYellow = 'yellow' : tf.colorYellow = 'grey'
-        routes[tf.routeIndex].path === '/2' ? tf.colorGreen = 'green' : tf.colorGreen = 'grey'
+      }, 1000)
+      setTimeout(() => {
+        clearTimeout(timerID)
+      }, timeout)
+    }
+
+    const startLight = function () {
+      const routes = tf.$router.options.routes
+      var currentUrl = window.location.pathname
+      switch (currentUrl) {
+        case '/':
+          tf.redTimer = 10
+          tf.routeIndex = 0
+          timer(currentUrl, tf.traffTimeout[tf.routeIndex])
+          changeOpacity(currentUrl)
+          toggleOpacity(currentUrl, 3000)
+          break
+        case '/1':
+          tf.yellowTimer = 3
+          tf.routeIndex = 1
+          timer(currentUrl, tf.traffTimeout[tf.routeIndex])
+          changeOpacity(currentUrl)
+          toggleOpacity(currentUrl, 2000)
+          break
+        case '/2':
+          tf.greenTimer = 15
+          tf.routeIndex = 2
+          timer(currentUrl, tf.traffTimeout[tf.routeIndex])
+          changeOpacity(currentUrl)
+          toggleOpacity(currentUrl, 3000)
+          break
+      }
+      tf.$router.push(currentUrl)
+      setTimeout(() => {
+        clearInterval(timerID)
         tf.routeIndex = (tf.routeIndex + 1) % routes.length
         tf.$router.push(routes[tf.routeIndex])
         startLight()
-      }, isStart ? 100 : tf.traffTimeout[tf.routeIndex])
-      isStart = false
+      }, tf.traffTimeout[tf.routeIndex])
     }
 
     startLight()
@@ -85,7 +133,7 @@ export default {
 <style scoped lang="scss">
 /*traffic-light */
 
-traffic-light {
+.traffic-light {
   display: flex;
 }
 
@@ -103,23 +151,31 @@ traffic-light {
 .traffic-light__item {
   width: 100px;
   height: 100px;
-  background-color: gray;
   border-radius: 50%;
+  opacity: 0.3;
+  display: flex;
 
-  &--red {
-    background-color: red;
+  &--active {
+    opacity: 1;
   }
 
-  &--yellow {
+  &-red {
+    background-color: red;
+
+  }
+
+  &-yellow {
     background-color: yellow;
   }
 
-  &--green {
-    background-color: green;
+  &-green {
+    background-color: rgb(15, 228, 15);
   }
+
 }
 
 .traffic-light__item:not(:last-child) {
   margin-bottom: 20px;
 }
+
 </style>
